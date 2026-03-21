@@ -84,7 +84,7 @@ xHeight = Math.min(Math.max(xHeight, 400), 600);
 
   async function fetchNewPosts() {
     try {
-      const res = await fetch(`http://localhost:3000/api/posts?since=${deliveredCount}`);
+      const res = await fetch(`https://echo-3qpg.onrender.com/api/posts?since=${deliveredCount}`);
       const posts = await res.json();
       const delay = isFirstLoad ? 6000 : 1000;
       posts.sort((a, b) => a.timestamp - b.timestamp);
@@ -102,7 +102,7 @@ xHeight = Math.min(Math.max(xHeight, 400), 600);
     const raw = tagInput.value.trim();
     if (!raw) return;
     const tags = raw.split(',').map(t => t.trim().replace('#', '')).filter(Boolean);
-    await fetch('http://localhost:3000/api/tags', {
+    await fetch('https://echo-3qpg.onrender.com/api/tags', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ tags })
