@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Echo Chamber</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="top">
+    <div class="main">
+      <div class="word">bhfruminole</div>
+    </div>
+    <div class="right-panel">
+      <div class="search-bar">
+        <input type="text" id="tag-input" placeholder="search a topic..." />
+        <button id="tag-submit">→</button>
+      </div>
+      <div class="sidebar" id="tweet-list"></div>
+    </div>
+  </div>
+  <div class="caption">
+    <p>
+      An echo chamber amplifies what is already there. Repetition turns into presence: what keeps circulating becomes what feels real.
+      This piece visualizes that mechanism through type.
+    </p>
+    <br>
+    <p>
+      The feed pulls real messages from the network, filtered by topic. Each message temporarily affects the central text. Higher activity increases the font weight; the average sentiment shifts the x-height. Both values decay continuously, so the word slowly returns to neutral unless new messages keep arriving.
+    </p>
+  </div>
+
+  <script>
+  const word = document.querySelector('.word');
+  word.style.fontVariationSettings = `"wght" 400, "XHGT" 450`;      
+  const tweetList = document.getElementById('tweet-list');
+  const tagInput = document.getElementById('tag-input');
+  const tagSubmit = document.getElementById('tag-submit');
+
+  let tweets = [];
+  const decayTime = 8000;
+  let deliveredCount = 0;
+  let isFirstLoad = true;
+
+  function addPost(post) {
+    if (document.getElementById(`post-${post.id}`)) return;
+    post.timeAdded = Date.now();
+    tweets.push(post);
+    const div = document.createElement('div');
+    div.id = `post-${post.id}`;
+    div.innerHTML = `
+      <strong>@${post.user}</strong>
+      <span class="time">(${post.date} ${post.time})</span><br>
+      ${post.text}
+    `;
+    tweetList.prepend(div);
+    updateWord();
+  }
+
+  function updateWord() {
+    const now = Date.now();
+    let volumeSum = 0;
+    let sentimentSum = 0;
+    let sentimentWeight = 0;
+    if (tweets.length === 0) {
+      word.style.fontVariationSettings = `"wght" 400, "XHGT" 450`;
+      return;
+    }
+    tweets.forEach(post => {
+      const age = now - post.timeAdded;
+      const decay = Math.exp(-age / decayTime);
+      volumeSum += decay;
+      sentimentSum += post.sentiment * decay;
+      sentimentWeight += decay;
+    });
+    let weight = 300 + Math.min(volumeSum, 5) * (400 / 5);
+    weight = Math.min(Math.max(weight, 300), 700);
+    let avgSentiment = sentimentWeight ? sentimentSum / sentimentWeight : 0;
+    let xHeight = 400 + ((avgSentiment + 1) / 2) * 200;
+xHeight = Math.min(Math.max(xHeight, 400), 600);
+    console.log('xHeight:', xHeight, 'weight:', weight, 'sentiment:', avgSentiment);
+    word.style.fontVariationSettings = `"wght" ${weight}, "XHGT" ${xHeight}`;
+  }
+
+  async function fetchNewPosts() {
+    try {
+      const res = await fetch(`http://localhost:3000/api/posts?since=${deliveredCount}`);
+      const posts = await res.json();
+      const delay = isFirstLoad ? 6000 : 1000;
+      posts.sort((a, b) => a.timestamp - b.timestamp);
+      posts.forEach((post, i) => {
+        setTimeout(() => addPost(post), i * delay);
+      });
+      deliveredCount += posts.length;
+      isFirstLoad = false;
+    } catch (err) {
+      console.warn('Server non raggiungibile:', err.message);
+    }
+  }
+
+  async function updateTags() {
+    const raw = tagInput.value.trim();
+    if (!raw) return;
+    const tags = raw.split(',').map(t => t.trim().replace('#', '')).filter(Boolean);
+    await fetch('http://localhost:3000/api/tags', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ tags })
+    });
+    tweets = [];
+    deliveredCount = 0;
+    isFirstLoad = true;
+    tweetList.innerHTML = '';
+    tagInput.value = '';
+    setTimeout(fetchNewPosts, 5000);
+  }
+
+  tagSubmit.addEventListener('click', updateTags);
+  tagInput.addEventListener('keydown', e => {
+    if (e.key === 'Enter') updateTags();
+  });
+
+  fetchNewPosts();
+  setInterval(fetchNewPosts, 5000);
+  setInterval(updateWord, 500);
+  </script>
+</body>
+</html>
