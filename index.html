@@ -86,7 +86,7 @@ xHeight = Math.min(Math.max(xHeight, 400), 600);
     try {
       const res = await fetch(`https://echo-3qpg.onrender.com/api/posts?since=${deliveredCount}`);
       const posts = await res.json();
-      const delay = isFirstLoad ? 6000 : 1000;
+      const delay = isFirstLoad ? 4000 : 800;
       posts.sort((a, b) => a.timestamp - b.timestamp);
       posts.forEach((post, i) => {
         setTimeout(() => addPost(post), i * delay);
