@@ -26,7 +26,7 @@ async function fetchPostsForTag(tag) {
       const oldest = new Date(d[d.length - 1].created_at).getTime();
       allPosts.push(...d);
       
-      if (Date.now() - oldest > 86400000) break;
+      if (Date.now() - oldest > 3600000) break;
       
       const linkHeader = r.headers.get('link');
       if (!linkHeader) break;
