@@ -15,7 +15,7 @@ let activeTags = [];
 
 async function fetchPostsForTag(tag) {
   const allPosts = [];
-  let url = `https://mastodon.social/api/v1/timelines/tag/${tag}?limit=40`;
+  let url = `https://mastodon.social/api/v1/timelines/tag/${tag}?limit=50`;
   
   for (let page = 0; page < 5; page++) {
     try {
@@ -88,7 +88,7 @@ async function fetchPosts() {
 app.get('/api/posts', (req, res) => {
   const since = parseInt(req.query.since || '0');
   const newPosts = cachedPosts.slice(0, cachedPosts.length - since);
-  const limit = since === 0 ? 50 : 5;
+  const limit = since === 0 ? 50 : 10;
   res.json(newPosts.slice(0, limit));
 });
 
