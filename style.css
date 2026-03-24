@@ -32,7 +32,7 @@ body {
 }
 
 .word {
-  font-size: clamp(2rem, 10vw, 15rem);
+  font-size: clamp(2rem, 5vw, 15rem);
   transition: font-variation-settings 1s ease;
   text-transform: lowercase;
   white-space: nowrap;
