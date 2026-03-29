@@ -32,7 +32,7 @@
 
   <script>
   const word = document.querySelector('.word');
-  word.style.fontVariationSettings = `"wght" 400, "XHGT" 450`;      
+  word.style.fontVariationSettings = `"wght" 400, "XHGT" 500`;      
   const tweetList = document.getElementById('tweet-list');
   const tagInput = document.getElementById('tag-input');
   const tagSubmit = document.getElementById('tag-submit');
@@ -63,7 +63,7 @@
     let sentimentSum = 0;
     let sentimentWeight = 0;
     if (tweets.length === 0) {
-      word.style.fontVariationSettings = `"wght" 400, "XHGT" 450`;
+      word.style.fontVariationSettings = `"wght" 400, "XHGT" 500`;
       return;
     }
     tweets.forEach(post => {
