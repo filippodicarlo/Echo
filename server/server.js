@@ -15,7 +15,7 @@ let activeTags = [];
 
 async function fetchPostsForTag(tag) {
   const allPosts = [];
-  let url = `https://mastodon.social/api/v1/timelines/tag/${tag}?limit=50`;
+  let url = `https://mastodon.social/api/v1/timelines/tag/${tag}?limit=40`;
   
   for (let page = 0; page < 5; page++) {
     try {
@@ -26,7 +26,7 @@ async function fetchPostsForTag(tag) {
       const oldest = new Date(d[d.length - 1].created_at).getTime();
       allPosts.push(...d);
       
-      if (Date.now() - oldest > 3600000) break;
+      if (Date.now() - oldest > 3000000) break;
       
       const linkHeader = r.headers.get('link');
       if (!linkHeader) break;
