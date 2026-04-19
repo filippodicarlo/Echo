@@ -41,6 +41,7 @@
   const decayTime = 5000;
   let deliveredCount = 0;
   let isFirstLoad = true;
+  let isUpdating = false;
 
   function addPost(post) {
     if (document.getElementById(`post-${post.id}`)) return;
@@ -83,6 +84,7 @@ xHeight = Math.min(Math.max(xHeight, 400), 600);
   }
 
   async function fetchNewPosts() {
+    if (isUpdating) return;
     try {
       const res = await fetch(`https://echo-3qpg.onrender.com/api/posts?since=${deliveredCount}`);
       const posts = await res.json();
@@ -101,6 +103,7 @@ xHeight = Math.min(Math.max(xHeight, 400), 600);
   async function updateTags() {
     const raw = tagInput.value.trim();
     if (!raw) return;
+    isUpdating = true;
     const tags = raw.split(',').map(t => t.trim().replace('#', '')).filter(Boolean);
     await fetch('https://echo-3qpg.onrender.com/api/tags', {
       method: 'POST',
@@ -112,6 +115,7 @@ xHeight = Math.min(Math.max(xHeight, 400), 600);
     isFirstLoad = true;
     tweetList.innerHTML = '';
     tagInput.value = '';
+    isUpdating = false;
     setTimeout(fetchNewPosts, 5000);
   }
 
