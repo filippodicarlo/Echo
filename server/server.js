@@ -70,8 +70,8 @@ async function fetchPosts() {
             text: text,
             sentiment: sentimentScore,
             timestamp: new Date(post.created_at).getTime(),
-            time: new Date(post.created_at).toLocaleTimeString(),
-            date: new Date(post.created_at).toLocaleDateString()
+            time: new Date(post.created_at).toLocaleTimeString('it-IT', { timeZone: 'Europe/Rome' }),
+            date: new Date(post.created_at).toLocaleDateString('it-IT', { timeZone: 'Europe/Rome' })
           });
         }
       }

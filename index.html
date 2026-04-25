@@ -9,9 +9,11 @@
 <body>
   <div class="top">
     <div class="main">
+      <div class="site-title">echo</div>
       <div class="word">shared enough to be true</div>
     </div>
     <div class="right-panel">
+      <div class="panel-title">live feed</div>
       <div class="search-bar">
         <input type="text" id="tag-input" placeholder="search a topic..." />
         <button id="tag-submit">→</button>
@@ -19,15 +21,15 @@
       <div class="sidebar" id="tweet-list"></div>
     </div>
   </div>
-  <div class="caption">
-    <p>
-      An echo chamber amplifies what is already there. Repetition turns into presence: what keeps circulating becomes what feels real.
-      This piece visualizes that mechanism through type.
-    </p>
-    <br>
-    <p>
-      The feed pulls real messages from the network, filtered by topic. Each message temporarily affects the central text. Higher activity increases the font weight; the average sentiment shifts the x-height. Both values decay continuously, so the word slowly returns to neutral unless new messages keep arriving.
-    </p>
+
+  <div class="bottom">
+    <div class="caption-wrapper">
+      <div class="panel-title">about</div>
+      <div class="caption">
+        <p>Type a topic. The feed loads real messages about it. The central text changes shape: heavier when more voices speak, taller or shorter as the mood shifts. Stop watching. Come back. See what remains.</p>
+      </div>
+    </div>
+    <div class="footer">© 2026 Filippo Di Carlo | Echo</div>
   </div>
 
   <script>
@@ -78,7 +80,7 @@
     weight = Math.min(Math.max(weight, 300), 700);
     let avgSentiment = sentimentWeight ? sentimentSum / sentimentWeight : 0;
     let xHeight = 400 + ((avgSentiment + 1) / 2) * 200;
-xHeight = Math.min(Math.max(xHeight, 400), 600);
+    xHeight = Math.min(Math.max(xHeight, 400), 600);
     console.log('xHeight:', xHeight, 'weight:', weight, 'sentiment:', avgSentiment);
     word.style.fontVariationSettings = `"wght" ${weight}, "XHGT" ${xHeight}`;
   }
