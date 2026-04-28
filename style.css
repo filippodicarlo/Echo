@@ -16,7 +16,6 @@ body {
   flex-direction: column;
   gap: 1vw;
   padding: 1vw;
-  overflow: hidden;
   cursor: url(pixel.cur), auto;
 }
 
