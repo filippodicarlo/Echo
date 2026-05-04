@@ -197,3 +197,20 @@ body {
   border: 3px solid #000;
   box-sizing: border-box;
 }
+
+@media (max-width: 768px) {
+  .top {
+    flex-direction: column;
+    flex: 1;
+  }
+
+  .right-panel {
+    order: 0;
+    flex: 0 0 auto;
+  }
+
+  .main {
+    flex: 1;
+    order: 1;
+  }
+}
