@@ -206,7 +206,8 @@ body {
 
   .right-panel {
     order: 0;
-    flex: 0 0 auto;
+    flex: 0 0 40vh;
+    overflow: hidden;
   }
 
   .main {
