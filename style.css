@@ -57,11 +57,12 @@ body {
 }
 
 .word {
-  font-size: clamp(2rem, 6vw, 15rem);
+  font-size: clamp(2rem, 9vw, 15rem);
   transition: font-variation-settings 0.8s ease;
   text-transform: lowercase;
   white-space: nowrap;
   padding: 20px;
+  text-align: center;
 }
 
 .right-panel {
