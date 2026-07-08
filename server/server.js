@@ -12,12 +12,19 @@ const FETCH_INTERVAL = 15000;
 let cachedPosts = [];
 let seenIds = new Set();
 let activeTags = [];
+let fetchGeneration = 0;
+let isFetching = false;
 
-async function fetchPostsForTag(tag) {
+async function fetchPostsForTag(tag, generation) {
   const allPosts = [];
   let url = `https://mastodon.social/api/v1/timelines/tag/${tag}?limit=40`;
   
   for (let page = 0; page < 5; page++) {
+    if (generation !== fetchGeneration) {
+
+        return [];
+
+    }
     try {
       const r = await fetch(url);
       const d = await r.json();
@@ -43,17 +50,24 @@ async function fetchPostsForTag(tag) {
   return allPosts;
 }
 
-async function fetchPosts() {
+async function fetchPosts( generation = fetchGeneration) {
   try {
+    if (isFetching) return;
+isFetching = true;
     const dataArrays = [];
     for (const tag of activeTags) {
-      const posts = await fetchPostsForTag(tag);
+      const posts = await fetchPostsForTag(tag, generation);
       if (posts.length > 0) dataArrays.push(posts);
       await new Promise(res => setTimeout(res, 300));
     }
     const posts = dataArrays.flat();
     const newPosts = [];
     for (const post of posts) {
+      if (generation !== fetchGeneration) {
+
+        return;
+
+    }
       const postAge = Date.now() - new Date(post.created_at).getTime();
       if (!seenIds.has(post.id) && post.content && postAge < 3600000) {
         seenIds.add(post.id);
@@ -76,12 +90,25 @@ async function fetchPosts() {
         }
       }
     }
-    if (newPosts.length > 0) {
-      cachedPosts = [...newPosts, ...cachedPosts].slice(0, 500);
-      console.log(`${new Date().toLocaleTimeString()} → ${newPosts.length} nuovi post`);
-    }
+    if (generation !== fetchGeneration) {
+  isFetching = false;
+  return;
+}
+
+if (newPosts.length > 0) {
+  cachedPosts = [...newPosts, ...cachedPosts].slice(0, 500);
+
+  console.log(
+    `${new Date().toLocaleTimeString()} → ${newPosts.length} nuovi post`
+  );
+}
   } catch (err) {
-    console.error('Errore fetch Mastodon:', err.message);
+
+  console.error('Errore fetch Mastodon:', err.message);
+
+} finally {
+
+  isFetching = false;
   }
 }
 
@@ -93,20 +120,44 @@ app.get('/api/posts', (req, res) => {
 });
 
 app.post('/api/tags', express.json(), async (req, res) => {
+
   const { tags } = req.body;
-  if (Array.isArray(tags) && tags.length > 0) {
-    activeTags = tags;
-    cachedPosts = [];
-    seenIds = new Set();
-    console.log('Tag aggiornati:', activeTags);
-    await fetchPosts();
-    res.json({ ok: true });
-  } else {
-    res.status(400).json({ error: 'tags non validi' });
+
+  if (!Array.isArray(tags) || tags.length === 0) {
+    return res.status(400).json({
+      error: 'tags non validi'
+    });
   }
+
+fetchGeneration++;
+isFetching = false;
+activeTags = tags;
+cachedPosts = [];
+seenIds = new Set();
+  
+  console.log('Tag aggiornati:', activeTags);
+
+  try {
+
+    await fetchPosts(fetchGeneration);
+
+    res.json({ ok: true });
+
+  } catch (err) {
+
+    console.error(err);
+
+    res.status(500).json({
+      error: 'errore interno'
+    });
+
+  }
+
 });
 
-fetchPosts();
-setInterval(fetchPosts, FETCH_INTERVAL);
+fetchPosts(fetchGeneration);
+setInterval(() => {
+    fetchPosts(fetchGeneration);
+}, FETCH_INTERVAL);
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Server avviato su porta ${PORT}`));

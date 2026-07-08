@@ -6,133 +6,310 @@
   <title>Echo</title>
   <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
-  
+
   <div class="top">
-    
+
     <div class="main">
       <div class="site-title">echo</div>
       <div class="word">shared enough to be true</div>
     </div>
-    
+
     <div class="right-panel">
+
       <div class="panel-title">live feed</div>
+
       <div class="search-bar">
-        <input type="text" id="tag-input" placeholder="search a topic..." />
+        <input
+          type="text"
+          id="tag-input"
+          placeholder="search a topic..."
+          autocomplete="off"
+        >
         <button id="tag-submit">→</button>
       </div>
+
       <div class="sidebar" id="tweet-list"></div>
+
     </div>
-    
+
   </div>
 
   <div class="bottom">
+
     <div class="caption-wrapper">
+
       <div class="panel-title">about</div>
+
       <div class="caption">
-        <p>Type a topic. The feed loads real messages about it. The central text changes shape: heavier when more voices speak, taller or shorter as the mood shifts. Stop watching. Come back. See what remains.</p>
+        <p>
+          Type a topic. The feed loads real messages about it.
+          The central text changes shape: heavier when more voices
+          speak, taller or shorter as the mood shifts.
+          Stop watching. Come back. See what remains.
+        </p>
       </div>
+
     </div>
-    <div class="footer">© 2026 Filippo Di Carlo | Echo</div>
+
+    <div class="footer">
+      © 2026 Filippo Di Carlo | Echo
+    </div>
+
   </div>
 
-  <script>
-  const word = document.querySelector('.word');
-  word.style.fontVariationSettings = `"wght" 400, "XHGT" 450`;      
-  const tweetList = document.getElementById('tweet-list');
-  const tagInput = document.getElementById('tag-input');
-  const tagSubmit = document.getElementById('tag-submit');
+<script>
 
-  let tweets = [];
-  const decayTime = 5000;
-  let deliveredCount = 0;
-  let isFirstLoad = true;
-  let isUpdating = false;
+const word = document.querySelector(".word");
+const tweetList = document.getElementById("tweet-list");
+const tagInput = document.getElementById("tag-input");
+const tagSubmit = document.getElementById("tag-submit");
 
-  function addPost(post) {
-    if (document.getElementById(`post-${post.id}`)) return;
+word.style.fontVariationSettings = `"wght" 400, "XHGT" 450`;
+
+let tweets = [];
+
+const decayTime = 5000;
+
+let deliveredCount = 0;
+let isFirstLoad = true;
+let isUpdating = false;
+let pendingTimeouts = [];
+
+
+/* ---------------------- */
+
+function resetFeed(){
+
+    pendingTimeouts.forEach(clearTimeout);
+    pendingTimeouts = [];
+
+    tweets = [];
+
+    deliveredCount = 0;
+
+    isFirstLoad = true;
+
+    tweetList.innerHTML = "";
+
+    word.style.fontVariationSettings =
+        `"wght" 400, "XHGT" 450`;
+
+}
+
+/* ---------------------- */
+
+function addPost(post){
+
+    if(document.getElementById(`post-${post.id}`))
+        return;
+
     post.timeAdded = Date.now();
+
     tweets.push(post);
-    const div = document.createElement('div');
+
+    const div = document.createElement("div");
+
     div.id = `post-${post.id}`;
+
     div.innerHTML = `
-      <strong>@${post.user}</strong>
-      <span class="time">(${post.date} ${post.time})</span><br>
-      ${post.text}
+        <strong>@${post.user}</strong>
+        <span class="time">(${post.date} ${post.time})</span><br>
+        ${post.text}
     `;
+
     tweetList.prepend(div);
     updateWord();
-  }
 
-  function updateWord() {
+}
+
+/* ---------------------- */
+
+function updateWord(){
+
+    if(tweets.length===0){
+
+        word.style.fontVariationSettings =
+        `"wght" 400, "XHGT" 450`;
+
+        return;
+
+    }
+
     const now = Date.now();
-    let volumeSum = 0;
-    let sentimentSum = 0;
-    let sentimentWeight = 0;
-    if (tweets.length === 0) {
-      word.style.fontVariationSettings = `"wght" 400, "XHGT" 450`;
-      return;
-    }
-    tweets.forEach(post => {
-      const age = now - post.timeAdded;
-      const decay = Math.exp(-age / decayTime);
-      volumeSum += decay;
-      sentimentSum += post.sentiment * decay;
-      sentimentWeight += decay;
+
+    let volume = 0;
+    let sentiment = 0;
+    let totalDecay = 0;
+
+    tweets.forEach(post=>{
+
+        const age = now-post.timeAdded;
+
+        const decay = Math.exp(-age/decayTime);
+
+        volume += decay;
+
+        sentiment += post.sentiment*decay;
+
+        totalDecay += decay;
+
     });
-    let weight = 300 + Math.min(volumeSum, 5) * (400 / 5);
-    weight = Math.min(Math.max(weight, 300), 700);
-    let avgSentiment = sentimentWeight ? sentimentSum / sentimentWeight : 0;
-    let xHeight = 400 + ((avgSentiment + 1) / 2) * 200;
-    xHeight = Math.min(Math.max(xHeight, 400), 600);
-    console.log('xHeight:', xHeight, 'weight:', weight, 'sentiment:', avgSentiment);
-    word.style.fontVariationSettings = `"wght" ${weight}, "XHGT" ${xHeight}`;
-  }
 
-  async function fetchNewPosts() {
-    if (isUpdating) return;
-    try {
-      const res = await fetch(`https://echo-3qpg.onrender.com/api/posts?since=${deliveredCount}`);
-      const posts = await res.json();
-      const delay = isFirstLoad ? 4000 : 800;
-      posts.sort((a, b) => a.timestamp - b.timestamp);
-      posts.forEach((post, i) => {
-        setTimeout(() => addPost(post), i * delay);
-      });
-      deliveredCount += posts.length;
-      isFirstLoad = false;
-    } catch (err) {
-      console.warn('Server non raggiungibile:', err.message);
+    let weight = 300 + Math.min(volume,5)*80;
+
+    weight = Math.max(300,Math.min(700,weight));
+
+    const avg =
+        totalDecay
+        ? sentiment/totalDecay
+        : 0;
+
+    let xHeight =
+        400 + ((avg+1)/2)*200;
+
+    xHeight = Math.max(400,Math.min(600,xHeight));
+
+    word.style.fontVariationSettings =
+        `"wght" ${weight}, "XHGT" ${xHeight}`;
+
+}
+
+/* ---------------------- */
+
+async function fetchNewPosts(){
+
+    if(isUpdating)
+        return;
+
+    try{
+
+        const response =
+            await fetch(
+            `https://echo-3qpg.onrender.com/api/posts?since=${deliveredCount}`
+            );
+
+        const posts =
+            await response.json();
+
+        posts.sort(
+            (a,b)=>a.timestamp-b.timestamp
+        );
+
+        const delay =
+            isFirstLoad
+            ? 4000
+            : 800;
+
+        posts.forEach((post,index)=>{
+
+    const timeout = setTimeout(()=>{
+
+        addPost(post);
+
+    },index*delay);
+
+    pendingTimeouts.push(timeout);
+
+});
+
+        deliveredCount += posts.length;
+
+        isFirstLoad = false;
+
     }
-  }
 
-  async function updateTags() {
-    const raw = tagInput.value.trim();
-    if (!raw) return;
+    catch(err){
+
+        console.warn(err);
+
+    }
+
+}
+
+/* ---------------------- */
+
+async function updateTags(){
+
+    const raw =
+        tagInput.value.trim();
+
+    if(!raw)
+        return;
+
     isUpdating = true;
-    const tags = raw.split(',').map(t => t.trim().replace('#', '')).filter(Boolean);
-    await fetch('https://echo-3qpg.onrender.com/api/tags', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ tags })
-    });
-    tweets = [];
-    deliveredCount = 0;
-    isFirstLoad = true;
-    tweetList.innerHTML = '';
-    tagInput.value = '';
-    isUpdating = false;
-    setTimeout(fetchNewPosts, 5000);
-  }
 
-  tagSubmit.addEventListener('click', updateTags);
-  tagInput.addEventListener('keydown', e => {
-    if (e.key === 'Enter') updateTags();
-  });
+    resetFeed();
 
-  fetchNewPosts();
-  setInterval(fetchNewPosts, 5000);
-  setInterval(updateWord, 500);
-  </script>
+    const tags = raw
+        .split(",")
+        .map(t=>t.trim().replace("#",""))
+        .filter(Boolean);
+
+    try{
+
+        await fetch(
+            "https://echo-3qpg.onrender.com/api/tags",
+            {
+
+                method:"POST",
+
+                headers:{
+                    "Content-Type":"application/json"
+                },
+
+                body:JSON.stringify({
+                    tags
+                })
+
+            }
+        );
+
+        tagInput.value = "";
+
+        await fetchNewPosts();
+
+    }
+
+    catch(err){
+
+        console.warn(err);
+
+    }
+
+    finally{
+
+        isUpdating = false;
+
+    }
+
+}
+
+/* ---------------------- */
+
+tagSubmit.addEventListener(
+    "click",
+    updateTags
+);
+
+tagInput.addEventListener(
+    "keydown",
+    e=>{
+
+        if(e.key==="Enter")
+            updateTags();
+
+    }
+);
+
+fetchNewPosts();
+
+setInterval(fetchNewPosts,5000);
+
+setInterval(updateWord,500);
+
+</script>
+
 </body>
 </html>
