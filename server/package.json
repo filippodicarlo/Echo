@@ -13,6 +13,7 @@
   "dependencies": {
     "cors": "^2.8.6",
     "express": "^5.2.1",
+    "franc": "^6.2.0",
     "node-fetch": "^2.7.0",
     "sentiment": "^5.0.2"
   }
