@@ -13,7 +13,7 @@
 
     <div class="main">
       <div class="site-title">echo</div>
-      <div class="word">shared enough <br>
+      <div class="word">shared <br> enough <br>
                         to be true</div>
     </div>
 
@@ -30,9 +30,13 @@
         >
         <button id="tag-submit">→</button>
       </div>
+    
+        <div class="stats" id="stats">
+  posts: 0
+</div>
 
-      <div class="sidebar" id="tweet-list"></div>
-
+<div class="sidebar" id="tweet-list"></div>
+        
     </div>
 
   </div>
@@ -66,12 +70,13 @@ const word = document.querySelector(".word");
 const tweetList = document.getElementById("tweet-list");
 const tagInput = document.getElementById("tag-input");
 const tagSubmit = document.getElementById("tag-submit");
+const stats = document.getElementById("stats");
 
-word.style.fontVariationSettings = `"wght" 400, "XHGT" 450`;
+word.style.fontVariationSettings = `"wght" 300, "XHGT" 450`;
 
 let tweets = [];
 
-const decayTime = 5000;
+const decayTime = 3000;
 
 let deliveredCount = 0;
 let isFirstLoad = true;
@@ -93,9 +98,11 @@ function resetFeed(){
     isFirstLoad = true;
 
     tweetList.innerHTML = "";
+    
+    stats.innerHTML = "posts: 0";
 
     word.style.fontVariationSettings =
-        `"wght" 400, "XHGT" 450`;
+        `"wght" 300, "XHGT" 450`;
 
 }
 
@@ -121,8 +128,49 @@ function addPost(post){
     `;
 
     tweetList.prepend(div);
+    
+    updateStats();
     updateWord();
 
+}
+    
+function updateStats(){
+
+    const languageCounts = {};
+
+    tweets.forEach(post => {
+
+        const lang = post.language || "unknown";
+
+        languageCounts[lang] =
+        (languageCounts[lang] || 0) + 1;
+
+    });
+
+
+    const total = tweets.length;
+
+
+    let output = `
+        posts: ${total}<br><br>
+    `;
+
+
+    Object.entries(languageCounts)
+    .sort((a,b)=>b[1]-a[1])
+    .forEach(([lang,count])=>{
+
+        const influence = 
+            (count / total).toFixed(2);
+
+
+        output += `
+        ${lang}: ${count} — influence ${influence}<br>
+        `;
+
+    });
+    
+    stats.innerHTML = output;
 }
 
 /* ---------------------- */
@@ -132,45 +180,71 @@ function updateWord(){
     if(tweets.length===0){
 
         word.style.fontVariationSettings =
-        `"wght" 400, "XHGT" 450`;
+        `"wght" 300, "XHGT" 450`;
 
         return;
 
     }
 
     const now = Date.now();
+    const languageCounts = {};
+
+    tweets.forEach(post => {
+
+    languageCounts[post.language] =
+        (languageCounts[post.language] || 0) + 1;
+
+    });
 
     let volume = 0;
     let sentiment = 0;
     let totalDecay = 0;
 
+    const languages = {};
+
+    tweets.forEach(post => {
+    const lang = post.language || "unknown";
+    languages[lang] = (languages[lang] || 0) + 1;
+    });
+
+const totalPosts = tweets.length;
+
     tweets.forEach(post=>{
 
-        const age = now-post.timeAdded;
+    const age = now-post.timeAdded;
 
-        const decay = Math.exp(-age/decayTime);
+    const decay = Math.exp(-age/decayTime);
 
-        volume += decay;
+    const languageWeight =
+    Math.log2((languageCounts[post.language] || 1) + 1);
 
-        sentiment += post.sentiment*decay;
+    volume += decay * languageWeight;
 
-        totalDecay += decay;
+    sentiment +=
+        post.sentiment *
+        decay *
+        languageWeight;
+
+    totalDecay +=
+        decay *
+        languageWeight;
 
     });
 
     let weight = 300 + Math.min(volume,5)*80;
 
     weight = Math.max(300,Math.min(700,weight));
-
+    
+/* qua controllo l'x-height con sentiment analysis*/
     const avg =
         totalDecay
         ? sentiment/totalDecay
         : 0;
 
     let xHeight =
-        400 + ((avg+1)/2)*200;
+        300 + ((avg+1)/2)*200;
 
-    xHeight = Math.max(400,Math.min(600,xHeight));
+    xHeight = Math.max(300,Math.min(600,xHeight));
 
     word.style.fontVariationSettings =
         `"wght" ${weight}, "XHGT" ${xHeight}`;

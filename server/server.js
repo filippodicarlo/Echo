@@ -2,12 +2,13 @@ const express = require('express');
 const cors = require('cors');
 const fetch = require('node-fetch');
 const Sentiment = require('sentiment');
+const { franc } = require('franc');
 
 const app = express();
 app.use(cors());
 
 const sentiment = new Sentiment();
-const FETCH_INTERVAL = 15000;
+const FETCH_INTERVAL = 8000;
 
 let cachedPosts = [];
 let seenIds = new Set();
@@ -76,16 +77,29 @@ isFetching = true;
           .replace(/https?:\/\/\S+/g, '')
           .replace(/\s+/g, ' ')
           .trim();
+        
         if (text.length > 0) {
           const sentimentScore = Math.max(-1, Math.min(1, sentiment.analyze(text).comparative * 5));
+          
+          const detectedLanguage = 
+            post.language || 
+            (franc(text) !== "und" ? franc(text) : "unknown");
+          console.log({
+    mastodon: post.language,
+    franc: franc(text),
+    detected: detectedLanguage,
+    text: text.slice(0, 80)
+});
+          
           newPosts.push({
-            id: post.id,
-            user: post.account.acct,
-            text: text,
-            sentiment: sentimentScore,
-            timestamp: new Date(post.created_at).getTime(),
-            time: new Date(post.created_at).toLocaleTimeString('it-IT', { timeZone: 'Europe/Rome' }),
-            date: new Date(post.created_at).toLocaleDateString('it-IT', { timeZone: 'Europe/Rome' })
+          id: post.id,
+          user: post.account.acct,
+          text: text,
+          sentiment: sentimentScore,
+          language: detectedLanguage,
+          timestamp: new Date(post.created_at).getTime(),
+          time: new Date(post.created_at).toLocaleTimeString('it-IT', { timeZone: 'Europe/Rome' }),
+          date: new Date(post.created_at).toLocaleDateString('it-IT', { timeZone: 'Europe/Rome' })
           });
         }
       }
