@@ -2,7 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const fetch = require('node-fetch');
 const Sentiment = require('sentiment');
-const { franc } = require('franc');
+const { franc } = require('franc'); /*libreria che stima la lingua del post*/
 
 const app = express();
 app.use(cors());
@@ -84,13 +84,7 @@ isFetching = true;
           const detectedLanguage = 
             post.language || 
             (franc(text) !== "und" ? franc(text) : "unknown");
-          console.log({
-    mastodon: post.language,
-    franc: franc(text),
-    detected: detectedLanguage,
-    text: text.slice(0, 80)
-});
-          
+      
           newPosts.push({
           id: post.id,
           user: post.account.acct,

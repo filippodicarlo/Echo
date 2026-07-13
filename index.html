@@ -133,7 +133,7 @@ function addPost(post){
     updateWord();
 
 }
-    
+    /* conta le lingue*/
 function updateStats(){
 
     const languageCounts = {};
@@ -214,7 +214,7 @@ const totalPosts = tweets.length;
     const age = now-post.timeAdded;
 
     const decay = Math.exp(-age/decayTime);
-
+    /*influenza lingua sul font; uso dei logaritmi per evitare che ci sia dominio di una lingua*/
     const languageWeight =
     Math.log2((languageCounts[post.language] || 1) + 1);
 
