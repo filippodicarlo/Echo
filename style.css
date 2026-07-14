@@ -8,15 +8,14 @@
 body {
   margin: 0;
   height: 100vh;
-  background: #5555DD;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='3' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.8'/%3E%3C/svg%3E");
-  color: #fff;
-  font-family: 'SignalGroteskVF', sans-serif;
+  background: #111;
+  color: #d8d8d8;
+  font-family: Menlo, Monaco, Consolas, monospace;
   display: flex;
   flex-direction: column;
   gap: 1vw;
   padding: 1vw;
-  cursor: url(pixel.cur), auto;
+  cursor: default;
 }
 
 .top {
@@ -27,14 +26,14 @@ body {
 }
 
 .main {
-  background: #fef6e4;
-  color: #000;
+  background: #0f0f0f;
+  color: white;
   flex: 4;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  border: 3px solid #000;
+  border: 1px solid #444;
   box-sizing: border-box;
   position: relative;
   overflow: hidden;
@@ -45,25 +44,27 @@ body {
   top: 0;
   left: 0;
   right: 0;
-  background: #5555DD;
-  color: #fff;
-  font-family: 'Verdana', sans-serif;
-  font-size: 11px;
-  font-weight: bold;
-  text-transform: uppercase;
-  letter-spacing: 2px;
-  padding: 4px 12px;
-  border-bottom: 3px solid #000;
+  background: #2b2b2b;
+  color: #d8d8d8;
+  font-family: 'Menlo', monospace;
+  font-size: 12px;
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: none;
+  padding: 8px 12px;
+  border-bottom: 1px solid #444;
 }
 
 .word {
+  font-family: 'SignalGroteskVF';
   font-size: clamp(2rem, 15vw, 20rem);
   transition: font-variation-settings 0.8s ease;
+  color: white;
   text-transform: lowercase;
   white-space: nowrap;
   padding: 20px;
   text-align: center;
-  letter-spacing: -0.3vw;
+  letter-spacing: -0.05em;
   line-height: 0.7;
 }
 
@@ -71,103 +72,126 @@ body {
   flex: 1;
   display: flex;
   flex-direction: column;
-  border: 3px solid #000;
+  border: 1px solid #444;
   box-sizing: border-box;
   order: -1;
 }
 
 .panel-title {
-  background: #5555DD;
-  color: #fff;
-  font-family: 'Verdana', sans-serif;
-  font-size: 11px;
-  font-weight: bold;
-  text-transform: uppercase;
-  letter-spacing: 2px;
-  padding: 4px 12px;
-  border-bottom: 3px solid #000;
+  background: #2b2b2b;
+  color: #d8d8d8;
+  font-family: 'Menlo', monospace;
+  font-size: 12px;
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: none;
+  padding: 8px 12px;
+  border-bottom: 1px solid #444;
 }
 
 .search-bar {
-  background: #fef6e4;
+  background: #0f0f0f;
   color: #000;
   display: flex;
   gap: 8px;
-  padding: 12px;
-  border-bottom: 3px solid #000;
+  padding: 10px;
+  border-bottom: 1px solid #444;
+  position: relative;
 }
 
 .search-bar input {
-  background: #5555DD;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='3' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.8'/%3E%3C/svg%3E");
-  border: 3px solid #000;
-  color: #fff;
+  background: #111;
+  border: 1px solid #555;
+  color: #d8d8d8;
   padding: 6px 12px;
-  font-family: 'Times New Roman', serif;
+  font-family: 'Menlo', monospace;
+  caret-color: #d6d6d6;
   font-size: 14px;
-  letter-spacing: 1px;
+  letter-spacing: 0;
   outline: none;
   flex: 1;
 }
 
 .search-bar input::placeholder {
-  color: #fff;
+  color: #777;
 }
 
 .search-bar button {
-  background: #5555DD;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='3' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.8'/%3E%3C/svg%3E");
-  border: 3px solid #000;
-  color: #fff;
+  background: #222;
+  border: 1px solid #555;
+  color: #d8d8d8;
   padding: 6px 12px;
   cursor: pointer;
+  font-family: 'Menlo', monospace;
   font-size: 14px;
 }
 
 .search-bar button:hover {
-  background: #fff;
+  background: #333;
   color: #5555DD;
 }
 
+.search-bar::after {
+    content: "";
+    position: absolute;
+    left: 24px;
+    top: 18px;
+    width: 2px;
+    height: 18px;
+    background: #d6d6d6;
+    animation: blink 1s steps(1) infinite;
+    pointer-events: none;
+}
+
+.search-bar:focus-within::after {
+    display: none;
+}
+
+@keyframes blink {
+    50% {
+        opacity: 0;
+    }
+}
+
 .stats {
-  background: #fef6e4;
-  color: #000;
-  font-family: 'Verdana', sans-serif;
+  background: #0f0f0f;
+  color: #8ae234;
+  font-family: 'Menlo', monospace;
   font-size: 12px;
   padding: 12px 20px;
-  border-bottom: 3px solid #000;
-  line-height: 1.5;
+  border-bottom: 1px solid #444;
+  line-height: 1.6;
 }
 
 .sidebar {
-  font-family: 'Verdana', sans-serif;
+  font-family: 'Menlo', monospace;
   font-weight: 100;
   font-size: clamp(10px, 1vw, 16px);
   flex: 1;
-  background: #fef6e4;
-  color: #000;
+  background: #0f0f0f;
+  color: #d8d8d8;
   padding: 20px;
   box-sizing: border-box;
   overflow-y: auto;
-  letter-spacing: 1px;
+  letter-spacing: 0;
   word-break: break-word;
   overflow-wrap: break-word;
 }
 
 .sidebar strong {
   font-weight: bold;
-  color: #FF0000;
+  color: #7fbfff;
 }
 
 .sidebar div {
   margin-bottom: 10px;
   padding: 5px;
-  border-bottom: 1px solid #ccc;
+  border-bottom: 1px solid #222;
 }
 
 .time {
   font-size: 12px;
-  color: #aaa;
+  color: #666;
 }
 
 .bottom {
@@ -177,19 +201,19 @@ body {
 }
 
 .caption-wrapper {
-  border: 3px solid #000;
+  border: 1px solid #444;
   box-sizing: border-box;
 }
 
 .caption {
-  background: #fef6e4;
-  font-family: 'Times New Roman', serif;
+  background: #0f0f0f;
+  font-family: 'Menlo', monospace;
   font-size: clamp(12px, 1.2vw, 20px);
   font-weight: 100;
-  line-height: 1.2;
+  line-height: 1.5;
   padding: 16px 20px;
   box-sizing: border-box;
-  color: #000;
+  color: #bdbdbd;
   white-space: normal;
   overflow-wrap: break-word;
   word-break: normal;
@@ -201,13 +225,13 @@ body {
 }
 
 .footer {
-  font-family: 'Verdana', sans-serif;
+  font-family: 'Menlo', monospace;
   font-size: 11px;
-  color: #000;
   text-align: center;
   padding: 8px;
-  background: #fef6e4;
-  border: 3px solid #000;
+  background: #2b2b2b;
+  color: #888;
+  border: 1px solid #444;
   box-sizing: border-box;
 }
 

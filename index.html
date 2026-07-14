@@ -141,33 +141,87 @@ function updateStats(){
         const lang = post.language || "unknown";
 
         languageCounts[lang] =
-        (languageCounts[lang] || 0) + 1;
-
+            (languageCounts[lang] || 0) + 1;
     });
-
 
     const total = tweets.length;
+    
+    if(total === 0){
 
+        stats.innerHTML = `$ echo statistics<br><br>posts........0`;
 
-    let output = `
-        posts: ${total}<br><br>
-    `;
+        return;
+    }
+    
+    const sortedLanguages = Object.entries(languageCounts)
+        .sort((a,b)=>b[1]-a[1]);
 
+    const dominantLanguage = sortedLanguages[0][0];
+    const languageNumber = sortedLanguages.length;
+    const now = Date.now();
+    
+    let volume = 0;
+    let sentiment = 0;
+    let totalDecay = 0;
 
-    Object.entries(languageCounts)
-    .sort((a,b)=>b[1]-a[1])
-    .forEach(([lang,count])=>{
+    tweets.forEach(post=>{
 
-        const influence = 
-            (count / total).toFixed(2);
+        const age = now - post.timeAdded;
 
+        const decay = Math.exp(-age/decayTime);
 
-        output += `
-        ${lang}: ${count} — influence ${influence}<br>
-        `;
+        const languageWeight =
+            Math.log2((languageCounts[post.language] || 1) + 1);
+
+        volume += decay * languageWeight;
+
+        sentiment +=
+            post.sentiment *
+            decay *
+            languageWeight;
+
+        totalDecay +=
+            decay *
+            languageWeight;
 
     });
-    
+
+    const weight =
+        Math.round(
+            Math.max(300, Math.min(700, 300 + Math.min(volume,5)*80))
+        );
+
+    const avgSentiment =
+        totalDecay
+        ? sentiment / totalDecay
+        : 0;
+
+    const xHeight =
+        Math.round(
+            Math.max(300, Math.min(600,
+                300 + ((avgSentiment+1)/2)*200
+            ))
+        );
+
+    let output = `$ echo statistics<br><br>`;
+
+    output += `posts........${total}<br><br>`;
+
+    output += `languages....${languageNumber}<br>`;
+    output += `dominant.....${dominantLanguage}<br><br>`;
+
+    sortedLanguages.forEach(([lang,count])=>{
+
+        const influence = (count/total).toFixed(2);
+
+        output += `${lang.padEnd(12,'.')}${count} (${influence})<br>`;
+
+    });
+    output += `<br>`;
+    output += `weight.......${weight}<br>`;
+    output += `x-height.....${xHeight}<br>`;
+    output += `sentiment....${avgSentiment.toFixed(2)}`;
+
     stats.innerHTML = output;
 }
 
