@@ -8,7 +8,7 @@ const app = express();
 app.use(cors());
 
 const sentiment = new Sentiment();
-const FETCH_INTERVAL = 8000;
+const FETCH_INTERVAL = 5000;
 
 let cachedPosts = [];
 let seenIds = new Set();
